@@ -3,7 +3,7 @@ services:
     name: chief-charles-memorial-api
     runtime: node
     plan: free
-    buildCommand: npm ci && npm run build --workspace @tribute/api
+    buildCommand: npm ci --include=dev && npm run build --workspace @tribute/api
     startCommand: npm run start --workspace @tribute/api
     healthCheckPath: /health
     envVars:
