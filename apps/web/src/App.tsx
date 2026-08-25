@@ -168,18 +168,18 @@ function TestimonialCarousel({ tributes }: { tributes: Tribute[] }) {
       </div>
 
       {tributes.length > 1 ? (
-        <div className="mt-5 flex items-center justify-between gap-6 max-sm:items-end">
-          <div className="flex items-center gap-[.85rem]">
+        <div className="mt-5 flex items-center justify-between gap-6 max-sm:mt-4 max-sm:justify-center">
+          <div className="flex items-center gap-[.85rem] max-sm:w-full max-sm:max-w-[260px] max-sm:justify-between">
             <button
               type="button"
-              className="h-11 w-11 cursor-pointer border border-[#ccd7df] bg-transparent p-0 text-[1.1rem] text-navy transition-colors hover:border-navy hover:bg-navy hover:text-white focus-visible:border-navy focus-visible:bg-navy focus-visible:text-white"
+              className="h-11 w-11 shrink-0 cursor-pointer border border-[#ccd7df] bg-transparent p-0 text-[1.1rem] text-navy transition-colors hover:border-navy hover:bg-navy hover:text-white focus-visible:border-navy focus-visible:bg-navy focus-visible:text-white max-sm:h-10 max-sm:w-10"
               onClick={showPrevious}
               aria-label="Show previous testimonial"
             >
               <span aria-hidden="true">←</span>
             </button>
             <p
-              className="min-w-[63px] text-center text-[.68rem] tracking-[.08em] text-[#8b99a2]"
+              className="min-w-[63px] text-center text-[.68rem] tracking-[.08em] text-[#8b99a2] max-sm:min-w-[76px] max-sm:text-[.72rem]"
               aria-live="polite"
               aria-atomic="true"
             >
@@ -191,7 +191,7 @@ function TestimonialCarousel({ tributes }: { tributes: Tribute[] }) {
             </p>
             <button
               type="button"
-              className="h-11 w-11 cursor-pointer border border-[#ccd7df] bg-transparent p-0 text-[1.1rem] text-navy transition-colors hover:border-navy hover:bg-navy hover:text-white focus-visible:border-navy focus-visible:bg-navy focus-visible:text-white"
+              className="h-11 w-11 shrink-0 cursor-pointer border border-[#ccd7df] bg-transparent p-0 text-[1.1rem] text-navy transition-colors hover:border-navy hover:bg-navy hover:text-white focus-visible:border-navy focus-visible:bg-navy focus-visible:text-white max-sm:h-10 max-sm:w-10"
               onClick={showNext}
               aria-label="Show next testimonial"
             >
@@ -199,7 +199,7 @@ function TestimonialCarousel({ tributes }: { tributes: Tribute[] }) {
             </button>
           </div>
           <div
-            className="flex items-center gap-[.45rem] max-sm:max-w-[45%] max-sm:flex-wrap max-sm:justify-end"
+            className="flex items-center gap-[.45rem] max-sm:hidden"
             aria-label="Choose a testimonial"
           >
             {tributes.map((tribute, index) => (
