@@ -233,19 +233,21 @@ function MemorialHome() {
 
   useEffect(() => {
     const controller = new AbortController();
-    Promise.all([
-      getMemorial(controller.signal),
-      getTributes(controller.signal),
-      getMemoryPhotos(controller.signal),
-    ])
-      .then(([memorial, approvedTributes, approvedMemoryPhotos]) => {
-        setData(memorial);
-        setTributes(approvedTributes);
-        setMemoryPhotos(approvedMemoryPhotos);
-      })
+    getMemorial(controller.signal)
+      .then(setData)
       .catch((error) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
         setLoadError(true);
+      });
+    getTributes(controller.signal)
+      .then(setTributes)
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      });
+    getMemoryPhotos(controller.signal)
+      .then(setMemoryPhotos)
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
       });
     return () => controller.abort();
   }, []);
