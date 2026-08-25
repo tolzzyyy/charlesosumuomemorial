@@ -504,6 +504,7 @@ export function createApp({ database, config, storage }: AppDependencies) {
     response
       .type(image.mimeType)
       .set("Cache-Control", "public, max-age=86400")
+      .set("Cross-Origin-Resource-Policy", "cross-origin")
       .send(imageData);
   });
 

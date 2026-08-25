@@ -242,6 +242,7 @@ describe("Tribute API", () => {
     await request(app)
       .get(publishedPhoto.image.url)
       .expect("Content-Type", /image\/png/)
+      .expect("Cross-Origin-Resource-Policy", "cross-origin")
       .expect(200);
   });
 
