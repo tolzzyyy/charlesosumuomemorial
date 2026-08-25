@@ -1,6 +1,5 @@
 import { timingSafeEqual, randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, unlinkSync } from "node:fs";
-import { extname, resolve } from "node:path";
+import { extname } from "node:path";
 import cors from "cors";
 import express, {
   type ErrorRequestHandler,
@@ -14,10 +13,12 @@ import multer from "multer";
 import { z, ZodError } from "zod";
 import type { AppConfig } from "./config.js";
 import type { TributeDatabase } from "./database.js";
+import { createPhotoStorage, type PhotoStorage } from "./storage.js";
 
 type AppDependencies = {
   database: TributeDatabase;
   config: AppConfig;
+  storage?: PhotoStorage;
 };
 
 type MemorialRow = {
@@ -96,17 +97,6 @@ const allowedImageTypes = new Map([
   ["image/gif", ".gif"],
 ]);
 
-function removeUploadedFile(file: Express.Multer.File | undefined): void {
-  if (!file) return;
-
-  try {
-    unlinkSync(file.path);
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code;
-    if (code !== "ENOENT") throw error;
-  }
-}
-
 function withPhotoMemoryImage(
   row: Record<string, unknown>,
   options: { admin?: boolean } = {},
@@ -125,9 +115,11 @@ function withPhotoMemoryImage(
   };
 }
 
-function findMemorial(database: TributeDatabase, slug: string): MemorialRow | undefined {
-  return database
-    .prepare(`
+async function findMemorial(
+  database: TributeDatabase,
+  slug: string,
+): Promise<MemorialRow | undefined> {
+  return await database.get<MemorialRow>(`
       SELECT
         id,
         slug,
@@ -145,8 +137,7 @@ function findMemorial(database: TributeDatabase, slug: string): MemorialRow | un
         content_status AS contentStatus
       FROM memorials
       WHERE slug = ?
-    `)
-    .get(slug) as MemorialRow | undefined;
+    `, slug);
 }
 
 function missingFields(memorial: MemorialRow, funeral: Record<string, unknown> | undefined): string[] {
@@ -165,18 +156,12 @@ function missingFields(memorial: MemorialRow, funeral: Record<string, unknown> |
   return missing;
 }
 
-export function createApp({ database, config }: AppDependencies) {
+export function createApp({ database, config, storage }: AppDependencies) {
   const app = express();
-  mkdirSync(config.uploadDir, { recursive: true });
+  const photoStorage = storage ?? createPhotoStorage(config);
 
   const imageUpload = multer({
-    storage: multer.diskStorage({
-      destination: config.uploadDir,
-      filename(_request, file, callback) {
-        const extension = allowedImageTypes.get(file.mimetype) ?? extname(file.originalname);
-        callback(null, `${randomUUID()}${extension.toLowerCase()}`);
-      },
-    }),
+    storage: multer.memoryStorage(),
     limits: { fileSize: 8 * 1024 * 1024, files: 1 },
     fileFilter(_request, file, callback) {
       if (!allowedImageTypes.has(file.mimetype)) {
@@ -225,8 +210,8 @@ export function createApp({ database, config }: AppDependencies) {
     });
   });
 
-  app.get("/api/v1/memorials/:slug", (request, response) => {
-    const memorial = findMemorial(database, request.params.slug);
+  app.get("/api/v1/memorials/:slug", async (request, response) => {
+    const memorial = await findMemorial(database, request.params.slug);
 
     if (!memorial) {
       response.status(404).json({
@@ -235,8 +220,7 @@ export function createApp({ database, config }: AppDependencies) {
       return;
     }
 
-    const timeline = database
-      .prepare(`
+    const timeline = await database.all(`
         SELECT
           id,
           event_year AS eventYear,
@@ -248,20 +232,16 @@ export function createApp({ database, config }: AppDependencies) {
         FROM timeline_events
         WHERE memorial_id = ?
         ORDER BY sort_order, event_year
-      `)
-      .all(memorial.id);
+      `, memorial.id);
 
-    const favourites = database
-      .prepare(`
+    const favourites = await database.all(`
         SELECT id, category, value, sort_order AS sortOrder
         FROM favourites
         WHERE memorial_id = ?
         ORDER BY sort_order, category
-      `)
-      .all(memorial.id);
+      `, memorial.id);
 
-    const funeral = database
-      .prepare(`
+    const funeral = await database.get<Record<string, unknown>>(`
         SELECT
           funeral_date AS funeralDate,
           funeral_time AS funeralTime,
@@ -280,11 +260,9 @@ export function createApp({ database, config }: AppDependencies) {
           rsvp_phone AS rsvpPhone
         FROM funeral_information
         WHERE memorial_id = ?
-      `)
-      .get(memorial.id) as Record<string, unknown> | undefined;
+      `, memorial.id);
 
-    const media = database
-      .prepare(`
+    const mediaRows = await database.all(`
         SELECT
           id,
           media_type AS mediaType,
@@ -296,9 +274,8 @@ export function createApp({ database, config }: AppDependencies) {
         FROM media
         WHERE memorial_id = ?
         ORDER BY is_featured DESC, sort_order
-      `)
-      .all(memorial.id)
-      .map((item) => ({
+      `, memorial.id);
+    const media = mediaRows.map((item) => ({
         ...item,
         isFeatured: Boolean(item.isFeatured),
       }));
@@ -315,8 +292,8 @@ export function createApp({ database, config }: AppDependencies) {
     });
   });
 
-  app.get("/api/v1/memorials/:slug/tributes", (request, response) => {
-    const memorial = findMemorial(database, request.params.slug);
+  app.get("/api/v1/memorials/:slug/tributes", async (request, response) => {
+    const memorial = await findMemorial(database, request.params.slug);
 
     if (!memorial) {
       response.status(404).json({
@@ -326,8 +303,7 @@ export function createApp({ database, config }: AppDependencies) {
     }
 
     const { limit, offset } = paginationSchema.parse(request.query);
-    const tributes = database
-      .prepare(`
+    const tributes = await database.all(`
         SELECT
           t.id, t.name, t.relationship, t.message,
           t.created_at AS createdAt
@@ -335,24 +311,24 @@ export function createApp({ database, config }: AppDependencies) {
         WHERE t.memorial_id = ? AND t.status = 'approved'
         ORDER BY t.created_at DESC
         LIMIT ? OFFSET ?
-      `)
-      .all(memorial.id, limit, offset);
-    const count = database
-      .prepare(`
+      `, memorial.id, limit, offset);
+    const count = await database.get<{ total: number | string }>(`
         SELECT COUNT(*) AS total
         FROM tributes
         WHERE memorial_id = ? AND status = 'approved'
-      `)
-      .get(memorial.id) as { total: number };
+      `, memorial.id);
 
-    response.json({ data: tributes, meta: { total: count.total, limit, offset } });
+    response.json({
+      data: tributes,
+      meta: { total: Number(count?.total ?? 0), limit, offset },
+    });
   });
 
   app.post(
     "/api/v1/memorials/:slug/tributes",
     submissionLimiter,
-    (request, response) => {
-      const memorial = findMemorial(database, request.params.slug as string);
+    async (request, response) => {
+      const memorial = await findMemorial(database, request.params.slug as string);
 
       if (!memorial) {
         response.status(404).json({
@@ -366,13 +342,11 @@ export function createApp({ database, config }: AppDependencies) {
       const createdAt = new Date().toISOString();
       const status = config.moderateTributes ? "pending" : "approved";
 
-      database
-        .prepare(`
+      await database.run(`
           INSERT INTO tributes (
             id, memorial_id, name, relationship, message, email, status, created_at
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `)
-        .run(
+        `,
           id,
           memorial.id,
           tribute.name,
@@ -381,7 +355,7 @@ export function createApp({ database, config }: AppDependencies) {
           tribute.email || null,
           status,
           createdAt,
-        );
+      );
 
       response.status(201).json({
         data: { id, status, createdAt },
@@ -393,8 +367,8 @@ export function createApp({ database, config }: AppDependencies) {
     },
   );
 
-  app.get("/api/v1/memorials/:slug/memory-photos", (request, response) => {
-    const memorial = findMemorial(database, request.params.slug);
+  app.get("/api/v1/memorials/:slug/memory-photos", async (request, response) => {
+    const memorial = await findMemorial(database, request.params.slug);
 
     if (!memorial) {
       response.status(404).json({
@@ -404,8 +378,7 @@ export function createApp({ database, config }: AppDependencies) {
     }
 
     const { limit, offset } = paginationSchema.parse(request.query);
-    const photoMemories = database
-      .prepare(`
+    const photoRows = await database.all(`
         SELECT
           id, contributor_name AS contributorName, caption,
           created_at AS createdAt
@@ -413,20 +386,17 @@ export function createApp({ database, config }: AppDependencies) {
         WHERE memorial_id = ? AND status = 'approved'
         ORDER BY created_at DESC
         LIMIT ? OFFSET ?
-      `)
-      .all(memorial.id, limit, offset)
-      .map((row) => withPhotoMemoryImage(row as Record<string, unknown>));
-    const count = database
-      .prepare(`
+      `, memorial.id, limit, offset);
+    const photoMemories = photoRows.map((row) => withPhotoMemoryImage(row));
+    const count = await database.get<{ total: number | string }>(`
         SELECT COUNT(*) AS total
         FROM photo_memories
         WHERE memorial_id = ? AND status = 'approved'
-      `)
-      .get(memorial.id) as { total: number };
+      `, memorial.id);
 
     response.json({
       data: photoMemories,
-      meta: { total: count.total, limit, offset },
+      meta: { total: Number(count?.total ?? 0), limit, offset },
     });
   });
 
@@ -434,25 +404,18 @@ export function createApp({ database, config }: AppDependencies) {
     "/api/v1/memorials/:slug/memory-photos",
     submissionLimiter,
     imageUpload.single("image"),
-    (request, response) => {
-      const memorial = findMemorial(database, request.params.slug as string);
+    async (request, response) => {
+      const memorial = await findMemorial(database, request.params.slug as string);
 
       if (!memorial) {
-        removeUploadedFile(request.file);
         response.status(404).json({
           error: { code: "NOT_FOUND", message: "Memorial not found." },
         });
         return;
       }
 
-      let photoMemory: z.infer<typeof photoMemorySchema>;
-
-      try {
-        photoMemory = photoMemorySchema.parse(request.body);
-      } catch (error) {
-        removeUploadedFile(request.file);
-        throw error;
-      }
+      const photoMemory: z.infer<typeof photoMemorySchema> =
+        photoMemorySchema.parse(request.body);
 
       if (!request.file) {
         response.status(400).json({
@@ -468,29 +431,31 @@ export function createApp({ database, config }: AppDependencies) {
       const id = randomUUID();
       const createdAt = new Date().toISOString();
       const status = config.moderateTributes ? "pending" : "approved";
+      const extension =
+        allowedImageTypes.get(request.file.mimetype) ?? extname(request.file.originalname);
+      const storageKey = `memory-photos/${id}${extension.toLowerCase()}`;
 
+      await photoStorage.save(storageKey, request.file.buffer, request.file.mimetype);
       try {
-        database
-          .prepare(`
+        await database.run(`
             INSERT INTO photo_memories (
               id, memorial_id, contributor_name, caption, storage_key,
               original_name, mime_type, size_bytes, status, created_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `)
-          .run(
+          `,
             id,
             memorial.id,
             photoMemory.contributorName,
             photoMemory.caption || null,
-            request.file.filename,
+            storageKey,
             request.file.originalname,
             request.file.mimetype,
             request.file.size,
             status,
             createdAt,
-          );
+        );
       } catch (error) {
-        removeUploadedFile(request.file);
+        await photoStorage.remove(storageKey);
         throw error;
       }
 
@@ -514,14 +479,12 @@ export function createApp({ database, config }: AppDependencies) {
     },
   );
 
-  app.get("/api/v1/memory-photo-images/:id", (request, response) => {
-    const image = database
-      .prepare(`
+  app.get("/api/v1/memory-photo-images/:id", async (request, response) => {
+    const image = await database.get<{ storageKey: string; mimeType: string }>(`
         SELECT storage_key AS storageKey, mime_type AS mimeType
         FROM photo_memories
         WHERE id = ? AND status = 'approved'
-      `)
-      .get(request.params.id) as { storageKey: string; mimeType: string } | undefined;
+      `, request.params.id);
 
     if (!image) {
       response.status(404).json({
@@ -530,8 +493,8 @@ export function createApp({ database, config }: AppDependencies) {
       return;
     }
 
-    const imagePath = resolve(config.uploadDir, image.storageKey);
-    if (!existsSync(imagePath)) {
+    const imageData = await photoStorage.read(image.storageKey);
+    if (!imageData) {
       response.status(404).json({
         error: { code: "NOT_FOUND", message: "Image file not found." },
       });
@@ -541,14 +504,14 @@ export function createApp({ database, config }: AppDependencies) {
     response
       .type(image.mimeType)
       .set("Cache-Control", "public, max-age=86400")
-      .sendFile(imagePath);
+      .send(imageData);
   });
 
   app.post(
     "/api/v1/memorials/:slug/rsvps",
     submissionLimiter,
-    (request, response) => {
-      const memorial = findMemorial(database, request.params.slug as string);
+    async (request, response) => {
+      const memorial = await findMemorial(database, request.params.slug as string);
 
       if (!memorial) {
         response.status(404).json({
@@ -561,14 +524,12 @@ export function createApp({ database, config }: AppDependencies) {
       const id = randomUUID();
       const createdAt = new Date().toISOString();
 
-      database
-        .prepare(`
+      await database.run(`
           INSERT INTO rsvps (
             id, memorial_id, name, phone, email, attendance,
             guest_count, note, created_at
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `)
-        .run(
+        `,
           id,
           memorial.id,
           rsvp.name,
@@ -578,7 +539,7 @@ export function createApp({ database, config }: AppDependencies) {
           rsvp.guestCount,
           rsvp.note || null,
           createdAt,
-        );
+      );
 
       response.status(201).json({
         data: { id, createdAt },
@@ -612,8 +573,8 @@ export function createApp({ database, config }: AppDependencies) {
 
   app.use("/api/v1/admin", requireAdmin);
 
-  app.get("/api/v1/admin/memorials/:slug/tributes", (request, response) => {
-    const memorial = findMemorial(database, request.params.slug);
+  app.get("/api/v1/admin/memorials/:slug/tributes", async (request, response) => {
+    const memorial = await findMemorial(database, request.params.slug);
 
     if (!memorial) {
       response.status(404).json({
@@ -627,8 +588,7 @@ export function createApp({ database, config }: AppDependencies) {
     const parameters = status
       ? [memorial.id, status, limit, offset]
       : [memorial.id, limit, offset];
-    const tributes = database
-      .prepare(`
+    const tributes = await database.all(`
         SELECT
           t.id, t.name, t.relationship, t.message, t.email, t.status,
           t.created_at AS createdAt, t.reviewed_at AS reviewedAt
@@ -636,22 +596,19 @@ export function createApp({ database, config }: AppDependencies) {
         WHERE t.memorial_id = ? ${whereStatus.replace("status", "t.status")}
         ORDER BY t.created_at DESC
         LIMIT ? OFFSET ?
-      `)
-      .all(...parameters);
+      `, ...parameters);
 
     response.json({ data: tributes, meta: { limit, offset } });
   });
 
-  app.patch("/api/v1/admin/tributes/:id", (request, response) => {
+  app.patch("/api/v1/admin/tributes/:id", async (request, response) => {
     const { status } = moderationSchema.parse(request.body);
     const reviewedAt = new Date().toISOString();
-    const result = database
-      .prepare(`
+    const result = await database.run(`
         UPDATE tributes
         SET status = ?, reviewed_at = ?
         WHERE id = ?
-      `)
-      .run(status, reviewedAt, request.params.id);
+      `, status, reviewedAt, request.params.id);
 
     if (result.changes === 0) {
       response.status(404).json({
@@ -663,8 +620,8 @@ export function createApp({ database, config }: AppDependencies) {
     response.json({ data: { id: request.params.id, status, reviewedAt } });
   });
 
-  app.get("/api/v1/admin/memorials/:slug/memory-photos", (request, response) => {
-    const memorial = findMemorial(database, request.params.slug);
+  app.get("/api/v1/admin/memorials/:slug/memory-photos", async (request, response) => {
+    const memorial = await findMemorial(database, request.params.slug);
 
     if (!memorial) {
       response.status(404).json({
@@ -678,8 +635,7 @@ export function createApp({ database, config }: AppDependencies) {
     const parameters = status
       ? [memorial.id, status, limit, offset]
       : [memorial.id, limit, offset];
-    const photoMemories = database
-      .prepare(`
+    const photoRows = await database.all(`
         SELECT
           id, contributor_name AS contributorName, caption, status,
           original_name AS originalName, mime_type AS mimeType,
@@ -689,25 +645,22 @@ export function createApp({ database, config }: AppDependencies) {
         WHERE memorial_id = ? ${whereStatus}
         ORDER BY created_at DESC
         LIMIT ? OFFSET ?
-      `)
-      .all(...parameters)
-      .map((row) =>
-        withPhotoMemoryImage(row as Record<string, unknown>, { admin: true }),
-      );
+      `, ...parameters);
+    const photoMemories = photoRows.map((row) =>
+      withPhotoMemoryImage(row, { admin: true }),
+    );
 
     response.json({ data: photoMemories, meta: { limit, offset } });
   });
 
-  app.patch("/api/v1/admin/memory-photos/:id", (request, response) => {
+  app.patch("/api/v1/admin/memory-photos/:id", async (request, response) => {
     const { status } = moderationSchema.parse(request.body);
     const reviewedAt = new Date().toISOString();
-    const result = database
-      .prepare(`
+    const result = await database.run(`
         UPDATE photo_memories
         SET status = ?, reviewed_at = ?
         WHERE id = ?
-      `)
-      .run(status, reviewedAt, request.params.id);
+      `, status, reviewedAt, request.params.id);
 
     if (result.changes === 0) {
       response.status(404).json({
@@ -719,14 +672,12 @@ export function createApp({ database, config }: AppDependencies) {
     response.json({ data: { id: request.params.id, status, reviewedAt } });
   });
 
-  app.get("/api/v1/admin/memory-photo-images/:id", (request, response) => {
-    const image = database
-      .prepare(`
+  app.get("/api/v1/admin/memory-photo-images/:id", async (request, response) => {
+    const image = await database.get<{ storageKey: string; mimeType: string }>(`
         SELECT storage_key AS storageKey, mime_type AS mimeType
         FROM photo_memories
         WHERE id = ?
-      `)
-      .get(request.params.id) as { storageKey: string; mimeType: string } | undefined;
+      `, request.params.id);
 
     if (!image) {
       response.status(404).json({
@@ -735,19 +686,19 @@ export function createApp({ database, config }: AppDependencies) {
       return;
     }
 
-    const imagePath = resolve(config.uploadDir, image.storageKey);
-    if (!existsSync(imagePath)) {
+    const imageData = await photoStorage.read(image.storageKey);
+    if (!imageData) {
       response.status(404).json({
         error: { code: "NOT_FOUND", message: "Image file not found." },
       });
       return;
     }
 
-    response.type(image.mimeType).set("Cache-Control", "private, no-store").sendFile(imagePath);
+    response.type(image.mimeType).set("Cache-Control", "private, no-store").send(imageData);
   });
 
-  app.get("/api/v1/admin/memorials/:slug/rsvps", (request, response) => {
-    const memorial = findMemorial(database, request.params.slug);
+  app.get("/api/v1/admin/memorials/:slug/rsvps", async (request, response) => {
+    const memorial = await findMemorial(database, request.params.slug);
 
     if (!memorial) {
       response.status(404).json({
@@ -757,8 +708,7 @@ export function createApp({ database, config }: AppDependencies) {
     }
 
     const { limit, offset } = paginationSchema.parse(request.query);
-    const rsvps = database
-      .prepare(`
+    const rsvps = await database.all(`
         SELECT
           id, name, phone, email, attendance,
           guest_count AS guestCount, note, created_at AS createdAt
@@ -766,8 +716,7 @@ export function createApp({ database, config }: AppDependencies) {
         WHERE memorial_id = ?
         ORDER BY created_at DESC
         LIMIT ? OFFSET ?
-      `)
-      .all(memorial.id, limit, offset);
+      `, memorial.id, limit, offset);
 
     response.json({ data: rsvps, meta: { limit, offset } });
   });

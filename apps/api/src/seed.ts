@@ -44,55 +44,49 @@ const memorialImages = Array.from({ length: 17 }, (_, index) => ({
   isFeatured: index === 10,
 }));
 
-export function seedDatabase(database: TributeDatabase): void {
-  const existingMemorial = database
-    .prepare("SELECT id FROM memorials LIMIT 1")
-    .get();
+export async function seedDatabase(database: TributeDatabase): Promise<void> {
+  const existingMemorial = await database.get("SELECT id FROM memorials LIMIT 1");
 
   if (existingMemorial) return;
 
   const memorialId = randomUUID();
   const now = new Date().toISOString();
 
-  database.exec("BEGIN IMMEDIATE");
-
-  try {
-    database
-      .prepare(`
+  await database.transaction(async (transaction) => {
+    await transaction.run(
+      `
         INSERT INTO memorials (
           id, slug, full_name, preferred_name, title, birth_year, birth_date,
           death_date, birth_place, place_of_passing, last_residence,
           opening_statement, hero_media_url, content_status, created_at, updated_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `)
-      .run(
-        memorialId,
-        "memorial",
-        "Osumuo Chidiebere Charles",
-        null,
-        "In Loving Memory",
-        1962,
-        null,
-        null,
-        "Cross River, Nigeria",
-        null,
-        null,
-        null,
-        "/images/memories/charles-11.jpg",
-        "draft",
-        now,
-        now,
-      );
+      `,
+      memorialId,
+      "memorial",
+      "Osumuo Chidiebere Charles",
+      null,
+      "In Loving Memory",
+      1962,
+      null,
+      null,
+      "Cross River, Nigeria",
+      null,
+      null,
+      null,
+      "/images/memories/charles-11.jpg",
+      "draft",
+      now,
+      now,
+    );
 
-    const insertTimeline = database.prepare(`
-      INSERT INTO timeline_events (
-        id, memorial_id, event_year, event_date, title, location,
-        description, sort_order, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    timeline.forEach((event, index) => {
-      insertTimeline.run(
+    for (const [index, event] of timeline.entries()) {
+      await transaction.run(
+        `
+          INSERT INTO timeline_events (
+            id, memorial_id, event_year, event_date, title, location,
+            description, sort_order, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `,
         randomUUID(),
         memorialId,
         event.year,
@@ -103,32 +97,30 @@ export function seedDatabase(database: TributeDatabase): void {
         (index + 1) * 10,
         now,
       );
-    });
+    }
 
-    const insertFavourite = database.prepare(`
-      INSERT INTO favourites (id, memorial_id, category, value, sort_order)
-      VALUES (?, ?, ?, ?, ?)
-    `);
-
-    favourites.forEach(([category, value], index) => {
-      insertFavourite.run(
+    for (const [index, [category, value]] of favourites.entries()) {
+      await transaction.run(
+        `
+          INSERT INTO favourites (id, memorial_id, category, value, sort_order)
+          VALUES (?, ?, ?, ?, ?)
+        `,
         randomUUID(),
         memorialId,
         category,
         value,
         (index + 1) * 10,
       );
-    });
+    }
 
-    const insertMedia = database.prepare(`
-      INSERT INTO media (
-        id, memorial_id, media_type, url, alt_text, caption,
-        is_featured, sort_order, created_at
-      ) VALUES (?, ?, 'image', ?, ?, ?, ?, ?, ?)
-    `);
-
-    memorialImages.forEach((image, index) => {
-      insertMedia.run(
+    for (const [index, image] of memorialImages.entries()) {
+      await transaction.run(
+        `
+          INSERT INTO media (
+            id, memorial_id, media_type, url, alt_text, caption,
+            is_featured, sort_order, created_at
+          ) VALUES (?, ?, 'image', ?, ?, ?, ?, ?, ?)
+        `,
         randomUUID(),
         memorialId,
         image.url,
@@ -138,10 +130,10 @@ export function seedDatabase(database: TributeDatabase): void {
         (index + 1) * 10,
         now,
       );
-    });
+    }
 
-    database
-      .prepare(`
+    await transaction.run(
+      `
         INSERT INTO funeral_information (
           id, memorial_id, funeral_date, funeral_time, venue, church_venue,
           burial_location, wake_details, thanksgiving_date,
@@ -149,31 +141,25 @@ export function seedDatabase(database: TributeDatabase): void {
           dress_code, programme_url, flyer_url, livestream_url,
           rsvp_phone, updated_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `)
-      .run(
-        randomUUID(),
-        memorialId,
-        "2026-10-30",
-        null,
-        "Family compound, Otolo, Nnewi",
-        "Catholic Church of the Holy Spirit, Omole Phase 1",
-        "Family compound, Nnewi",
-        "Wake and lying-in-state will take place on the day of the burial.",
-        "2026-11-01",
-        null,
-        null,
-        null,
-        "Burial Ankara",
-        null,
-        null,
-        null,
-        "08061176503",
-        now,
-      );
-
-    database.exec("COMMIT");
-  } catch (error) {
-    database.exec("ROLLBACK");
-    throw error;
-  }
+      `,
+      randomUUID(),
+      memorialId,
+      "2026-10-30",
+      null,
+      "Family compound, Otolo, Nnewi",
+      "Catholic Church of the Holy Spirit, Omole Phase 1",
+      "Family compound, Nnewi",
+      "Wake and lying-in-state will take place on the day of the burial.",
+      "2026-11-01",
+      null,
+      null,
+      null,
+      "Burial Ankara",
+      null,
+      null,
+      null,
+      "08061176503",
+      now,
+    );
+  });
 }

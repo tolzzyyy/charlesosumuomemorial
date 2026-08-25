@@ -87,8 +87,43 @@ The React site is configured for Vercel from the repository root. Set
 `VITE_API_URL` in the Vercel project to the public URL of the API before the
 production build.
 
-The API currently uses SQLite and local disk uploads. Deploy it to a host with
-persistent storage, or migrate the database and photo uploads to managed
-storage before using the public submission forms in production. Do not deploy
-the writable SQLite database or upload directory inside a Vercel Function;
-those files would not be durable across function instances.
+The production backend is configured for a free Render web service, with a
+free Supabase project providing durable Postgres data and private photo
+storage. SQLite and local uploads remain the defaults for local development.
+
+1. Create a Supabase project. In **Connect**, copy the **Session pooler** URI
+   (port 5432), and replace its password placeholder with your database
+   password. In **Project Settings → API**, copy the project URL and the
+   `service_role` key. Keep that key private; never add it to Vercel or the
+   browser app.
+2. Before deploying Render, optionally import the existing local testimonials
+   and uploaded photos into the new, empty Supabase project. Put the three
+   Supabase values in `apps/api/.env`, then run:
+
+   ```bash
+   npm run migrate:production --workspace @tribute/api
+   ```
+
+   The import refuses to run if Supabase already contains a memorial, so it
+   cannot overwrite an existing production site.
+3. In Render, create a **Blueprint** from this GitHub repository. Render reads
+   [render.yaml](./render.yaml) and asks for `DATABASE_URL`, `SUPABASE_URL`,
+   `SUPABASE_SERVICE_ROLE_KEY`, and `WEB_ORIGINS`. Set `WEB_ORIGINS` to the
+   final Vercel URL and custom domain, separated by commas and including
+   `https://`.
+4. Deploy the Render service. The API creates its database tables and initial
+   memorial data on first startup; it creates the private `memory-photos`
+   bucket on the first photo request. Copy the resulting Render URL and confirm
+   that `/health` returns `status: ok`.
+5. In Vercel, set `VITE_API_URL` to the Render URL (without a trailing slash),
+   then redeploy the frontend. Add both the Vercel URL and custom domain to
+   Render's `WEB_ORIGINS` whenever either changes.
+
+No production secret belongs in a committed `.env` file. Render's generated
+`ADMIN_API_KEY` can be copied from its environment settings when an admin tool
+needs it.
+
+On the free plans, Render sleeps after inactivity, so the first API request can
+take roughly a minute. Supabase may pause a free project after a week with no
+activity. Neither affects persisted testimonials, RSVPs, or photos once the
+services wake again.

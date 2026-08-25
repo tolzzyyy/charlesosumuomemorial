@@ -21,26 +21,27 @@ describe("Tribute API", () => {
   let database: TributeDatabase;
   let uploadDir: string;
 
-  before(() => {
+  before(async () => {
     uploadDir = mkdtempSync(join(tmpdir(), "tribute-api-test-"));
     const config: AppConfig = {
       port: 4100,
       databasePath: ":memory:",
       uploadDir,
+      supabaseStorageBucket: "memory-photos",
       webOrigins: ["http://localhost:5173"],
       adminApiKey,
       moderateTributes: true,
       nodeEnv: "test",
     };
 
-    database = openDatabase(":memory:");
-    migrateDatabase(database);
-    seedDatabase(database);
+    database = openDatabase({ databasePath: ":memory:" });
+    await migrateDatabase(database);
+    await seedDatabase(database);
     app = createApp({ database, config });
   });
 
-  after(() => {
-    database.close();
+  after(async () => {
+    await database.close();
     rmSync(uploadDir, { recursive: true, force: true });
   });
 
@@ -63,21 +64,23 @@ describe("Tribute API", () => {
     assert.ok(!response.body.data.missingFields.includes("fullName"));
   });
 
-  it("moves legacy tribute photos into photo memories without changing static media", () => {
-    const memorial = database
-      .prepare("SELECT id FROM memorials WHERE slug = ?")
-      .get("memorial") as { id: string };
-    const staticMediaBefore = database
-      .prepare("SELECT COUNT(*) AS total FROM media WHERE memorial_id = ?")
-      .get(memorial.id) as { total: number };
+  it("moves legacy tribute photos into photo memories without changing static media", async () => {
+    const memorial = await database.get<{ id: string }>(
+      "SELECT id FROM memorials WHERE slug = ?",
+      "memorial",
+    );
+    assert.ok(memorial);
+    const staticMediaBefore = await database.get<{ total: number }>(
+      "SELECT COUNT(*) AS total FROM media WHERE memorial_id = ?",
+      memorial.id,
+    );
+    assert.ok(staticMediaBefore);
 
-    database
-      .prepare(`
+    await database.run(`
         INSERT INTO tributes (
           id, memorial_id, name, relationship, message, status, created_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?)
-      `)
-      .run(
+      `,
         "legacy-tribute",
         memorial.id,
         "Legacy Contributor",
@@ -85,15 +88,13 @@ describe("Tribute API", () => {
         "A testimonial submitted through the former combined form.",
         "rejected",
         "2026-01-01T00:00:00.000Z",
-      );
-    database
-      .prepare(`
+    );
+    await database.run(`
         INSERT INTO tribute_media (
           id, tribute_id, storage_key, original_name, mime_type,
           size_bytes, alt_text, created_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `)
-      .run(
+      `,
         "legacy-photo",
         "legacy-tribute",
         "legacy-photo.jpg",
@@ -102,24 +103,25 @@ describe("Tribute API", () => {
         4,
         "A family day",
         "2026-01-01T00:00:00.000Z",
-      );
+    );
 
-    migrateDatabase(database);
+    await migrateDatabase(database);
 
-    const migrated = database
-      .prepare(`
-        SELECT contributor_name AS contributorName, caption, status
-        FROM photo_memories
-        WHERE id = ?
-      `)
-      .get("legacy-photo") as {
+    const migrated = await database.get<{
       contributorName: string;
       caption: string;
       status: string;
-    };
-    const staticMediaAfter = database
-      .prepare("SELECT COUNT(*) AS total FROM media WHERE memorial_id = ?")
-      .get(memorial.id) as { total: number };
+    }>(`
+        SELECT contributor_name AS contributorName, caption, status
+        FROM photo_memories
+        WHERE id = ?
+      `, "legacy-photo");
+    const staticMediaAfter = await database.get<{ total: number }>(
+      "SELECT COUNT(*) AS total FROM media WHERE memorial_id = ?",
+      memorial.id,
+    );
+    assert.ok(migrated);
+    assert.ok(staticMediaAfter);
 
     assert.deepEqual({ ...migrated }, {
       contributorName: "Legacy Contributor",
@@ -269,6 +271,7 @@ describe("Tribute API", () => {
         port: 4100,
         databasePath: ":memory:",
         uploadDir,
+        supabaseStorageBucket: "memory-photos",
         webOrigins: ["http://localhost:5173"],
         adminApiKey,
         moderateTributes: false,
@@ -304,6 +307,7 @@ describe("Tribute API", () => {
         port: 4100,
         databasePath: ":memory:",
         uploadDir,
+        supabaseStorageBucket: "memory-photos",
         webOrigins: ["http://localhost:5173"],
         adminApiKey,
         moderateTributes: false,

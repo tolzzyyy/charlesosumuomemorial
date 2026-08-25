@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: chief-charles-memorial-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build --workspace @tribute/api
+    startCommand: npm run start --workspace @tribute/api
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 24.14.1
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: memory-photos
+      - key: WEB_ORIGINS
+        sync: false
+      - key: ADMIN_API_KEY
+        generateValue: true
+      - key: MODERATE_TRIBUTES
+        value: "true"

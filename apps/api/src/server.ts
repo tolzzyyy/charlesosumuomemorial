@@ -5,10 +5,13 @@ import { migrateDatabase, openDatabase } from "./database.js";
 import { seedDatabase } from "./seed.js";
 
 const config = loadConfig();
-const database = openDatabase(config.databasePath);
+const database = openDatabase({
+  databasePath: config.databasePath,
+  databaseUrl: config.databaseUrl,
+});
 
-migrateDatabase(database);
-seedDatabase(database);
+await migrateDatabase(database);
+await seedDatabase(database);
 
 const app = createApp({ database, config });
 const server = app.listen(config.port, () => {
@@ -17,8 +20,8 @@ const server = app.listen(config.port, () => {
 
 function shutdown(signal: string) {
   console.log(`${signal} received. Closing the API.`);
-  server.close(() => {
-    database.close();
+  server.close(async () => {
+    await database.close();
     process.exit(0);
   });
 }
