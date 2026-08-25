@@ -1,0 +1,7 @@
+apps/api/data/
+apps/api/uploads/
+apps/api/test/
+apps/web/source-images/
+coverage/
+scripts/
+*.log

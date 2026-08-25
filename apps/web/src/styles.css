@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", sans-serif;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --color-navy: #03263f;
+  --color-navy-deep: #011b2e;
+  --color-mist: #edf3f9;
+  --color-gold: #c79b52;
+  --color-ink: #10202c;
+  --color-muted: #677783;
+}
+
+@layer base {
+  :root {
+    color: var(--color-ink);
+    background: #f8fafc;
+    font-family: var(--font-sans);
+    font-synthesis: none;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-width: 320px;
+    background: #f8fafc;
+    line-height: 1.65;
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

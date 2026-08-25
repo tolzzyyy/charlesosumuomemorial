@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.vercel/
+.DS_Store
+*.tsbuildinfo
+*.log
+apps/api/data/*.db
+apps/api/data/*.db-shm
+apps/api/data/*.db-wal
+apps/api/uploads/
+apps/web/source-images/
+coverage/
