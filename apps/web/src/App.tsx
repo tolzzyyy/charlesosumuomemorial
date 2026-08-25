@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MemoryForm } from "./components/MemoryForm";
 import { MemoryPhotoForm } from "./components/MemoryPhotoForm";
 import { GalleryPage } from "./components/GalleryPage";
@@ -216,6 +216,111 @@ function TestimonialCarousel({ tributes }: { tributes: Tribute[] }) {
                 aria-current={index === activeIndex ? "true" : undefined}
               />
             ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function CommunityPhotoCarousel({
+  photos,
+  onOpen,
+}: {
+  photos: MemoryPhoto[];
+  onOpen: (image: LightboxImage) => void;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    setActiveIndex((current) => Math.min(current, Math.max(photos.length - 1, 0)));
+  }, [photos.length]);
+
+  function showPhoto(index: number) {
+    const normalizedIndex = (index + photos.length) % photos.length;
+    const item = trackRef.current?.children.item(normalizedIndex) as HTMLElement | null;
+    item?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    setActiveIndex(normalizedIndex);
+  }
+
+  function handleScroll() {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const items = Array.from(track.children) as HTMLElement[];
+    const closestIndex = items.reduce((closest, item, index) => {
+      const closestDistance = Math.abs(items[closest].offsetLeft - track.scrollLeft);
+      const distance = Math.abs(item.offsetLeft - track.scrollLeft);
+      return distance < closestDistance ? index : closest;
+    }, 0);
+    setActiveIndex(closestIndex);
+  }
+
+  return (
+    <div role="region" aria-label="Photographs shared by family and friends">
+      <div
+        ref={trackRef}
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        onScroll={handleScroll}
+      >
+        {photos.map((photo, index) => (
+          <button
+            type="button"
+            className="group relative aspect-[4/5] basis-[calc((100%-2rem)/3)] shrink-0 snap-start cursor-zoom-in overflow-hidden border-0 bg-mist p-0 text-left max-[980px]:basis-[calc((100%-1rem)/2)] max-sm:basis-[86%]"
+            key={photo.id}
+            onClick={() =>
+              onOpen({ url: apiUrl(photo.image.url), altText: photo.image.altText })
+            }
+            aria-label={`Open photograph ${index + 1} of ${photos.length}, shared by ${photo.contributorName}`}
+          >
+            <img
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.035]"
+              src={apiUrl(photo.image.url)}
+              alt={photo.image.altText ?? `Photograph shared by ${photo.contributorName}`}
+              loading="lazy"
+            />
+            <span className="absolute inset-x-0 bottom-0 grid gap-1 bg-gradient-to-t from-navy/95 to-transparent px-5 pt-20 pb-5 text-white">
+              <strong className="font-display text-xl leading-[1.3]">
+                {photo.caption || "A memory of Chief Charles"}
+              </strong>
+              <small className="text-[.68rem] tracking-[.06em] text-white/75 uppercase">
+                Shared by {photo.contributorName}
+              </small>
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {photos.length > 1 ? (
+        <div className="mt-5 flex items-center justify-between gap-6 max-sm:mt-3">
+          <p className="text-[.68rem] tracking-[.08em] text-[#8b99a2]" aria-live="polite">
+            <span className="font-bold text-navy">
+              {String(activeIndex + 1).padStart(2, "0")}
+            </span>
+            <span aria-hidden="true"> / </span>
+            <span>{String(photos.length).padStart(2, "0")}</span>
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="mr-2 text-[.65rem] tracking-[.08em] text-muted uppercase max-sm:hidden">
+              Swipe or browse
+            </span>
+            <button
+              type="button"
+              className="h-11 w-11 cursor-pointer border border-[#ccd7df] bg-white p-0 text-[1.1rem] text-navy transition-colors hover:border-navy hover:bg-navy hover:text-white max-sm:h-10 max-sm:w-10"
+              onClick={() => showPhoto(activeIndex - 1)}
+              aria-label="Show previous shared photograph"
+            >
+              <span aria-hidden="true">←</span>
+            </button>
+            <button
+              type="button"
+              className="h-11 w-11 cursor-pointer border border-[#ccd7df] bg-white p-0 text-[1.1rem] text-navy transition-colors hover:border-navy hover:bg-navy hover:text-white max-sm:h-10 max-sm:w-10"
+              onClick={() => showPhoto(activeIndex + 1)}
+              aria-label="Show next shared photograph"
+            >
+              <span aria-hidden="true">→</span>
+            </button>
           </div>
         </div>
       ) : null}
@@ -550,17 +655,7 @@ function MemorialHome() {
                 <p className={eyebrowClass}>Shared photographs</p>
                 <h3 className="font-display text-[clamp(2rem,4vw,3.4rem)] leading-[1.15] text-navy">Added by family and friends.</h3>
               </div>
-              <div className="grid grid-cols-3 gap-4 max-[980px]:grid-cols-2 max-sm:grid-cols-1">
-                {memoryPhotos.map((photo) => (
-                  <button type="button" className="group relative aspect-[4/5] cursor-zoom-in overflow-hidden border-0 bg-mist p-0 text-left" key={photo.id} onClick={() => setSelectedImage({ url: apiUrl(photo.image.url), altText: photo.image.altText })} aria-label={`Open photograph shared by ${photo.contributorName}`}>
-                    <img className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.035]" src={apiUrl(photo.image.url)} alt={photo.image.altText ?? `Photograph shared by ${photo.contributorName}`} loading="lazy" />
-                    <span className="absolute inset-x-0 bottom-0 grid gap-1 bg-gradient-to-t from-navy/95 to-transparent px-5 pt-16 pb-5 text-white">
-                      <strong className="font-display text-xl leading-[1.3]">{photo.caption || "A memory of Chief Charles"}</strong>
-                      <small className="text-[.68rem] tracking-[.06em] text-white/75 uppercase">Shared by {photo.contributorName}</small>
-                    </span>
-                  </button>
-                ))}
-              </div>
+              <CommunityPhotoCarousel photos={memoryPhotos} onOpen={setSelectedImage} />
             </div>
           ) : null}
 
