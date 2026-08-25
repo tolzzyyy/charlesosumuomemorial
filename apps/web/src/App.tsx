@@ -33,7 +33,7 @@ function memorialThumbnailUrl(url: string): string {
 const eyebrowClass =
   "mb-3 text-[.68rem] font-semibold uppercase tracking-[.18em] text-[#8a6b34]";
 const pageSectionClass =
-  "px-[clamp(1.25rem,10vw,10rem)] py-[clamp(6.5rem,11vw,10.5rem)] max-sm:px-5 max-sm:py-[4.25rem]";
+  "px-[clamp(1.25rem,10vw,10rem)] py-[clamp(4.75rem,8vw,7.5rem)] max-sm:px-5 max-sm:py-[3.5rem]";
 const buttonClass =
   "inline-flex min-h-12 cursor-pointer items-center justify-center border border-transparent px-[1.4rem] py-[.85rem] text-[.72rem] font-semibold uppercase tracking-[.09em] transition-transform duration-200 hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70 disabled:hover:translate-y-0";
 const textLinkClass =
@@ -95,7 +95,7 @@ function SectionHeading({
         {eyebrow}
       </p>
       <h2
-        className={`mb-[clamp(3rem,5vw,4.2rem)] font-display text-[clamp(2.25rem,5vw,4.35rem)] leading-[1.12] font-semibold tracking-[-.03em] max-sm:text-[2.3rem] max-sm:leading-[1.12] ${
+        className={`mb-[clamp(2.2rem,4vw,3.2rem)] font-display text-[clamp(2.25rem,5vw,4.35rem)] leading-[1.12] font-semibold tracking-[-.03em] max-sm:mb-8 max-sm:text-[2.3rem] max-sm:leading-[1.12] ${
           compactOnMobile ? "max-sm:text-[2.05rem] max-sm:leading-[1.1]" : ""
         }`}
       >
@@ -524,7 +524,7 @@ function MemorialHome() {
           </figure>
         </section>
 
-        <section className="grid min-h-[440px] place-items-center bg-mist px-5 py-[clamp(6rem,10vw,8.5rem)] text-center max-sm:py-[4.25rem]">
+        <section className="grid min-h-[380px] place-items-center bg-mist px-5 py-[clamp(4.5rem,7vw,6.5rem)] text-center max-sm:min-h-0 max-sm:py-[3.5rem]">
           <div className="max-w-[780px]">
             <p className={eyebrowClass}>Remembering Chief Charles</p>
             <h2 className="mb-4 font-display text-[clamp(2.15rem,5vw,4rem)] leading-[1.12] text-navy max-sm:text-[2.2rem] max-sm:leading-[1.1]">A beloved husband, father and friend.</h2>
@@ -650,7 +650,7 @@ function MemorialHome() {
           </div>
 
           {memoryPhotos.length ? (
-            <div id="community-photo-wall" className="mt-24 border-t border-[#dfe6eb] pt-[4.5rem]">
+            <div id="community-photo-wall" className="mt-16 border-t border-[#dfe6eb] pt-12 max-sm:mt-12 max-sm:pt-10">
               <div className="mb-8">
                 <p className={eyebrowClass}>Shared photographs</p>
                 <h3 className="font-display text-[clamp(2rem,4vw,3.4rem)] leading-[1.15] text-navy">Added by family and friends.</h3>
@@ -659,7 +659,7 @@ function MemorialHome() {
             </div>
           ) : null}
 
-          <div className="mt-24 grid grid-cols-[.8fr_1.2fr] gap-[clamp(3rem,7vw,7rem)] bg-mist p-[clamp(1.5rem,5vw,4.5rem)] max-[980px]:grid-cols-1 max-sm:mt-16 max-sm:p-5">
+          <div className="mt-16 grid grid-cols-[.8fr_1.2fr] gap-[clamp(3rem,7vw,7rem)] bg-mist p-[clamp(1.5rem,5vw,4.5rem)] max-[980px]:grid-cols-1 max-sm:mt-12 max-sm:p-5">
             <div>
               <p className={eyebrowClass}>Add to the Memory Wall</p>
               <h3 className="mb-5 font-display text-[clamp(2rem,4vw,3.4rem)] leading-[1.12] text-navy max-sm:text-[1.9rem] max-sm:leading-[1.1]">Share a photograph of Chief Charles.</h3>
@@ -670,7 +670,7 @@ function MemorialHome() {
         </section>
 
         <section id="testimonials" className={`${pageSectionClass} bg-[#f8fafc]`}>
-          <div className="mt-24 border-t border-[#dfe6eb] pt-[4.5rem] max-sm:mt-16">
+          <div className="border-t border-[#dfe6eb] pt-12 max-sm:pt-10">
             <div className="mb-8 flex items-end justify-between gap-8 max-sm:flex-col max-sm:items-start">
               <div>
                 <p className={`${eyebrowClass} mb-[.55rem]`}>Testimonials</p>
