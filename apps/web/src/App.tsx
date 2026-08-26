@@ -335,6 +335,7 @@ function MemorialHome() {
   const [loadError, setLoadError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<LightboxImage | null>(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -366,6 +367,17 @@ function MemorialHome() {
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [selectedImage]);
 
+  useEffect(() => {
+    const updateBackToTopVisibility = () => {
+      const hero = document.getElementById("top");
+      setShowBackToTop(hero ? hero.getBoundingClientRect().bottom < 0 : window.scrollY > 600);
+    };
+
+    updateBackToTopVisibility();
+    window.addEventListener("scroll", updateBackToTopVisibility, { passive: true });
+    return () => window.removeEventListener("scroll", updateBackToTopVisibility);
+  }, []);
+
   const gallery = useMemo(() => {
     if (!data?.media.length) return fallbackGallery;
     const preferred = [3, 10, 8, 13, 17];
@@ -396,16 +408,6 @@ function MemorialHome() {
             year: "2026",
             title: "Funeral & burial",
             detail: formatDate(funeral.funeralDate),
-          },
-        ]
-      : []),
-    ...(funeral?.thanksgivingDate
-      ? [
-          {
-            key: "thanksgiving",
-            year: "2026",
-            title: "Thanksgiving service",
-            detail: formatDate(funeral.thanksgivingDate),
           },
         ]
       : []),
@@ -703,6 +705,20 @@ function MemorialHome() {
         <strong className="font-display text-[1.35rem]">Chief Charles Chidiebere Osumuo</strong>
         <span className="text-[.62rem] tracking-[.14em] text-[#849aab] uppercase">2026 · Forever remembered</span>
       </footer>
+
+      <a
+        className={`fixed right-6 bottom-6 z-40 grid h-12 w-12 place-items-center rounded-full border border-white/30 bg-navy text-xl text-white shadow-[0_10px_30px_rgba(1,27,46,.3)] transition-[opacity,transform,background-color] duration-300 hover:-translate-y-1 hover:bg-gold focus-visible:-translate-y-1 focus-visible:bg-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy max-sm:right-4 max-sm:bottom-4 max-sm:h-11 max-sm:w-11 ${
+          showBackToTop
+            ? "pointer-events-auto translate-y-0 opacity-100"
+            : "pointer-events-none translate-y-3 opacity-0"
+        }`}
+        href="#top"
+        aria-label="Back to the hero section"
+        aria-hidden={!showBackToTop}
+        tabIndex={showBackToTop ? 0 : -1}
+      >
+        <span aria-hidden="true">↑</span>
+      </a>
 
       {selectedImage ? (
         <div className="fixed inset-0 z-[60] grid place-items-center bg-[rgba(0,19,32,.94)] p-8" role="dialog" aria-modal="true" aria-label="Memory photograph">
