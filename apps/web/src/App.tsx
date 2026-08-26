@@ -64,6 +64,53 @@ const fallbackGallery = [3, 10, 8, 13, 17].map((number, index) => ({
   sortOrder: index,
 }));
 
+const funeralArrangements = [
+  {
+    title: "Requiem Mass",
+    date: "Tuesday 13th October 2026",
+    details: [
+      "Address: Catholic Church of the Holy Spirit,",
+      "56 Adeyemo Akakpo Street, by 1 Agoro Street, Omole Estate Phase 1, Ikeja, Ojodu Berger 100213, Lagos.",
+      "Time: 5pm",
+    ],
+  },
+  {
+    title: "Wake Keep (Lagos)",
+    date: "Thursday 15th October 2026",
+    details: [
+      "Address: The Stable, Union Bank Hall,",
+      "43/45 Bode Thomas, Surulere, Lagos.",
+      "Time: 9am–6pm",
+    ],
+  },
+  {
+    title: "Wake Keep (Village)",
+    date: "Thursday 29th October 2026",
+    details: [
+      "Wake keep at his compound, Okofia Village, Otolo, Nnewi.",
+      "Time: 5pm",
+    ],
+  },
+  {
+    title: "Lying in State & Final Burial",
+    date: "Friday 30th October 2026",
+    details: [
+      "7:00am – Body leaves Nnewi Diocesan Mortuary, Akwudo.",
+      "8:00am – Lying in state in his house in Okofia, Otolo, Nnewi.",
+      "10:00am – Body leaves for Mass at St Paul Catholic Church, Okofia, Otolo, Nnewi.",
+      "12:30pm – Internment in his compound, Okofia, Otolo, Nnewi.",
+    ],
+  },
+  {
+    title: "Thanksgiving Mass",
+    date: "Sunday 1st November 2026",
+    details: [
+      "St Pauls Catholic Church, Okofia, Otolo, Nnewi.",
+      "Time: 6:30am",
+    ],
+  },
+] as const;
+
 function formatDate(date: string | null): string {
   if (!date) return "To be announced";
   return new Intl.DateTimeFormat("en-NG", {
@@ -578,25 +625,20 @@ function MemorialHome() {
 
         <section id="funeral" className={`${pageSectionClass} grid grid-cols-[.7fr_1.3fr] gap-[clamp(3rem,7vw,7rem)] bg-white max-[980px]:grid-cols-1`}>
           <div>
-            <SectionHeading className="text-navy" eyebrow="Coming together">Funeral & thanksgiving.</SectionHeading>
+            <SectionHeading className="text-navy" eyebrow="Coming together">Funeral arrangements.</SectionHeading>
             <p className="max-w-[450px] leading-[1.7] text-muted max-sm:text-[.95rem] max-sm:leading-[1.6]">Family and friends are invited to gather, remember and celebrate Chief Charles&apos; life.</p>
           </div>
           <div className="border-t border-[#dbe2e7]">
-            {[
-              { eyebrow: "Funeral & burial", title: formatDate(funeral?.funeralDate ?? null), details: [funeral?.funeralTime ?? "Time to be announced", funeral?.venue ?? "Family compound, Otolo, Nnewi"], addressIndex: 1 },
-              { eyebrow: "Church service", title: "Catholic Church of the Holy Spirit", details: [funeral?.churchVenue ?? "Omole Phase 1", funeral?.wakeDetails], addressIndex: 0 },
-              { eyebrow: "Thanksgiving", title: formatDate(funeral?.thanksgivingDate ?? null), details: [funeral?.thanksgivingTime ?? "Time to be announced", funeral?.dressCode ? `Dress code: ${funeral.dressCode}` : null], addressIndex: null },
-            ].map((item) => (
-              <article className="grid grid-cols-[.65fr_1.35fr] gap-x-6 border-b border-[#dbe2e7] py-[1.7rem] max-sm:grid-cols-1" key={item.eyebrow}>
-                <p className={`${eyebrowClass} row-span-3 max-sm:row-auto`}>{item.eyebrow}</p>
-                <h3 className="mb-[.4rem] font-display text-[1.45rem] leading-[1.25] text-navy max-sm:leading-[1.2]">{item.title}</h3>
-                {item.details.map((detail, index) => detail ? (
-                  index === item.addressIndex ? (
-                    <address className="mb-1 text-[.85rem] leading-[1.6] text-muted not-italic max-sm:leading-[1.55]" key={detail}>{detail}</address>
-                  ) : (
-                    <p className="mb-1 text-[.85rem] leading-[1.6] text-muted max-sm:leading-[1.55]" key={detail}>{detail}</p>
-                  )
-                ) : null)}
+            {funeralArrangements.map((item, index) => (
+              <article className="grid grid-cols-[.65fr_1.35fr] gap-x-6 border-b border-[#dbe2e7] py-[1.7rem] max-sm:grid-cols-1 max-sm:py-6" key={item.title}>
+                <p className={`${eyebrowClass} row-span-3 max-sm:row-auto`}>{String(index + 1).padStart(2, "0")}</p>
+                <h3 className="mb-1 font-display text-[1.55rem] leading-[1.25] text-navy max-sm:text-[1.4rem] max-sm:leading-[1.25]">{item.title}</h3>
+                <p className="mb-3 text-[.78rem] font-semibold tracking-[.02em] text-[#526675] max-sm:leading-[1.55]">{item.date}</p>
+                <div className="grid gap-1">
+                  {item.details.map((detail) => (
+                    <p className="text-[.85rem] leading-[1.65] text-muted max-sm:leading-[1.6]" key={detail}>{detail}</p>
+                  ))}
+                </div>
               </article>
             ))}
           </div>
