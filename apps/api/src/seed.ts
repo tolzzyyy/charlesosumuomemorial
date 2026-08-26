@@ -40,7 +40,7 @@ const favourites = [
 
 const memorialImages = Array.from({ length: 17 }, (_, index) => ({
   url: `/images/memories/charles-${String(index + 1).padStart(2, "0")}.jpg`,
-  altText: `A photograph from Chief Charles Osumuo's life, ${index + 1} of 17`,
+  altText: `A photograph from Chief Charles Chidiebere Osumuo's life, ${index + 1} of 17`,
   isFeatured: index === 10,
 }));
 
@@ -63,7 +63,7 @@ export async function seedDatabase(database: TributeDatabase): Promise<void> {
       `,
       memorialId,
       "memorial",
-      "Osumuo Chidiebere Charles",
+      "Chief Charles Chidiebere Osumuo",
       null,
       "In Loving Memory",
       1962,

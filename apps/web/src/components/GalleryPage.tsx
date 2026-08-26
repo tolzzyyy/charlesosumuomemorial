@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 
-const memorialPhotos = Array.from({ length: 40 }, (_, index) => ({
-  number: index + 1,
-  src: `/images/memories/charles-${String(index + 1).padStart(2, "0")}.jpg`,
-  thumbnail: `/images/memories/thumbs/charles-${String(index + 1).padStart(2, "0")}.jpg`,
-  alt: `A photograph from Chief Charles Osumuo's life, ${index + 1} of 40`,
+const excludedPhotoNumbers = new Set([20, 21, 23, 24, 25]);
+const galleryPhotoNumbers = Array.from({ length: 40 }, (_, index) => index + 1).filter(
+  (number) => !excludedPhotoNumbers.has(number),
+);
+const memorialPhotos = galleryPhotoNumbers.map((number, index) => ({
+  src: `/images/memories/charles-${String(number).padStart(2, "0")}.jpg`,
+  thumbnail: `/images/memories/thumbs/charles-${String(number).padStart(2, "0")}.jpg`,
+  alt: `A photograph from Chief Charles Chidiebere Osumuo's life, ${index + 1} of ${galleryPhotoNumbers.length}`,
 }));
 
 export function GalleryPage() {
@@ -49,9 +52,9 @@ export function GalleryPage() {
       </a>
 
       <header className="flex h-[76px] items-center justify-between border-b border-[#e7ebee] bg-white px-[clamp(1.25rem,6vw,6.5rem)] max-sm:h-[68px] max-sm:px-5">
-        <a className="grid leading-none tracking-[.12em] uppercase" href="/" aria-label="Chief Charles Osumuo memorial home">
+        <a className="grid leading-none tracking-[.12em] uppercase" href="/" aria-label="Chief Charles Chidiebere Osumuo memorial home">
           <span className="mb-[.38rem] text-[.58rem] font-semibold text-gold max-sm:hidden">In loving memory</span>
-          <strong className="font-display text-[1.05rem] tracking-[.06em] text-navy max-sm:text-[.92rem]">Chief Charles Osumuo</strong>
+          <strong className="font-display text-[1.05rem] tracking-[.06em] text-navy max-sm:text-[.78rem] max-sm:tracking-[.025em]">Chief Charles Chidiebere Osumuo</strong>
         </a>
         <a
           className="text-[.7rem] font-semibold tracking-[.08em] text-navy uppercase transition-colors hover:text-gold focus-visible:text-gold"
@@ -68,7 +71,7 @@ export function GalleryPage() {
             A lifetime in photographs.
           </h1>
           <p className="mt-7 max-w-[580px] text-[.95rem] leading-[1.7] text-[#bdcbd5] max-sm:text-[.9rem] max-sm:leading-[1.6]">
-            Forty photographs shared by family and friends, gathered together in memory of Chief Charles.
+            Thirty-five photographs shared by family and friends, gathered together in memory of Chief Charles.
           </p>
         </section>
 
@@ -80,7 +83,7 @@ export function GalleryPage() {
           <div className="mb-8 flex items-end justify-between gap-6 border-b border-[#dfe6eb] pb-5">
             <div>
               <p className="mb-2 text-[.64rem] font-semibold tracking-[.16em] text-[#8a6b34] uppercase">All memories</p>
-              <h2 className="font-display text-[clamp(2rem,4vw,3.3rem)] leading-[1.1] text-navy">40 photographs</h2>
+              <h2 className="font-display text-[clamp(2rem,4vw,3.3rem)] leading-[1.1] text-navy">{memorialPhotos.length} photographs</h2>
             </div>
             <p className="text-[.72rem] leading-[1.55] text-muted max-sm:max-w-[130px] max-sm:text-right">Select a photograph to view it full screen.</p>
           </div>
@@ -92,7 +95,7 @@ export function GalleryPage() {
                 className="group relative mb-4 block w-full cursor-zoom-in break-inside-avoid overflow-hidden border-0 bg-mist p-0 text-left"
                 key={photo.src}
                 onClick={() => setSelectedIndex(index)}
-                aria-label={`Open photograph ${photo.number} of ${memorialPhotos.length}`}
+                aria-label={`Open photograph ${index + 1} of ${memorialPhotos.length}`}
               >
                 <img
                   className="h-auto w-full transition-[transform,filter] duration-500 group-hover:scale-[1.025] group-hover:saturate-100"
@@ -111,7 +114,7 @@ export function GalleryPage() {
       </main>
 
       <footer className="grid min-h-[120px] place-content-center gap-[.4rem] bg-navy-deep text-center text-white">
-        <strong className="font-display text-[1.25rem]">Chief Osumuo Chidiebere Charles</strong>
+        <strong className="font-display text-[1.25rem]">Chief Charles Chidiebere Osumuo</strong>
         <span className="text-[.6rem] tracking-[.14em] text-[#849aab] uppercase">1962 · Forever remembered</span>
       </footer>
 
@@ -120,7 +123,7 @@ export function GalleryPage() {
           className="fixed inset-0 z-[60] grid place-items-center bg-[rgba(0,19,32,.96)] p-8 max-sm:p-4"
           role="dialog"
           aria-modal="true"
-          aria-label={`Photograph ${selectedPhoto.number} of ${memorialPhotos.length}`}
+          aria-label={`Photograph ${selectedIndex + 1} of ${memorialPhotos.length}`}
           onClick={(event) => {
             if (event.target === event.currentTarget) setSelectedIndex(null);
           }}
@@ -156,7 +159,7 @@ export function GalleryPage() {
             →
           </button>
           <p className="fixed bottom-5 left-1/2 -translate-x-1/2 text-[.68rem] tracking-[.12em] text-white/75 uppercase max-sm:bottom-8">
-            {String(selectedPhoto.number).padStart(2, "0")} / {memorialPhotos.length}
+            {String(selectedIndex + 1).padStart(2, "0")} / {memorialPhotos.length}
           </p>
         </div>
       ) : null}

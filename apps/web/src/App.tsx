@@ -58,7 +58,7 @@ const fallbackGallery = [3, 10, 8, 13, 17].map((number, index) => ({
   id: `fallback-${number}`,
   mediaType: "image" as const,
   url: `/images/memories/charles-${String(number).padStart(2, "0")}.jpg`,
-  altText: `A photograph from Chief Charles Osumuo's life`,
+  altText: `A photograph from Chief Charles Chidiebere Osumuo's life`,
   caption: null,
   isFeatured: false,
   sortOrder: index,
@@ -378,7 +378,7 @@ function MemorialHome() {
 
   const timeline = data?.timeline ?? [];
   const funeral = data?.funeral;
-  const fullName = data?.memorial.fullName ?? "Osumuo Chidiebere Charles";
+  const fullName = data?.memorial.fullName ?? "Chief Charles Chidiebere Osumuo";
   const name = fullName.startsWith("Chief ") ? fullName : `Chief ${fullName}`;
   const heroImage = data?.memorial.heroMediaUrl ?? "/images/memories/charles-11.jpg";
 
@@ -463,9 +463,9 @@ function MemorialHome() {
         Skip to main content
       </a>
       <header className="relative z-20 flex h-[86px] items-center justify-between border-b border-[#e7ebee] bg-white px-[clamp(1.25rem,6vw,6.5rem)] max-[980px]:h-[72px] max-sm:px-5">
-        <a className="grid leading-none tracking-[.12em] uppercase" href="#top" aria-label="Chief Charles Osumuo memorial home">
+        <a className="grid leading-none tracking-[.12em] uppercase" href="#top" aria-label="Chief Charles Chidiebere Osumuo memorial home">
           <span className="mb-[.38rem] text-[.58rem] font-semibold text-gold max-sm:hidden">In loving memory</span>
-          <strong className="font-display text-[1.05rem] tracking-[.06em] text-navy max-sm:text-[.92rem]">Chief Charles Osumuo</strong>
+          <strong className="font-display text-[1.05rem] tracking-[.06em] text-navy max-sm:text-[.78rem] max-sm:tracking-[.025em]">Chief Charles Chidiebere Osumuo</strong>
         </a>
         <button
           className="hidden h-[42px] w-[42px] cursor-pointer place-content-center gap-1 border-0 bg-transparent text-navy max-[980px]:grid"
@@ -520,7 +520,7 @@ function MemorialHome() {
           <figure className="relative mx-auto w-full max-w-[430px] pt-[1.1rem] pl-[1.1rem] max-[980px]:w-[min(78vw,430px)] max-sm:w-full max-sm:max-w-[390px] max-sm:pt-[.65rem] max-sm:pl-[.65rem]">
             <span className="absolute inset-[0_1.1rem_1.1rem_0] border border-gold/70 max-sm:inset-[0_.65rem_.65rem_0]" aria-hidden="true" />
             <MemorialImage className="relative z-10 aspect-[4/5] w-full object-cover object-[50%_22%] saturate-[.88] contrast-[1.02]" src={heroImage} alt={`Portrait of ${name}`} fetchPriority="high" />
-            <figcaption className="absolute right-[-1.5rem] bottom-[3.2rem] z-20 text-[.58rem] tracking-[.18em] text-[#dce5eb] uppercase [writing-mode:vertical-rl] max-sm:hidden">Chief Osumuo Chidiebere Charles</figcaption>
+            <figcaption className="absolute right-[-1.5rem] bottom-[3.2rem] z-20 text-[.58rem] tracking-[.18em] text-[#dce5eb] uppercase [writing-mode:vertical-rl] max-sm:hidden">Chief Charles Chidiebere Osumuo</figcaption>
           </figure>
         </section>
 
@@ -537,7 +537,7 @@ function MemorialHome() {
         <section id="story" className={`${pageSectionClass} grid grid-cols-[minmax(300px,.86fr)_minmax(330px,1fr)] items-center gap-[clamp(3rem,9vw,9rem)] bg-white max-[980px]:grid-cols-1 max-sm:gap-10`}>
           <div className="relative max-w-[530px] max-[980px]:w-full max-[980px]:max-w-[600px]">
             <span className="absolute -top-[1.1rem] -left-[1.1rem] z-10 h-[32%] w-[44%] border-t border-l border-gold" />
-            <MemorialImage className="aspect-[4/5] w-full object-cover object-[50%_28%] max-sm:aspect-[4/4.6]" src="/images/memories/charles-01.jpg" alt="Chief Charles Osumuo wearing a maroon traditional outfit" loading="lazy" />
+            <MemorialImage className="aspect-[4/5] w-full object-cover object-[50%_28%] max-sm:aspect-[4/4.6]" src="/images/memories/charles-01.jpg" alt="Chief Charles Chidiebere Osumuo wearing a maroon traditional outfit" loading="lazy" />
           </div>
           <div className="max-w-[680px]">
             <SectionHeading className="text-navy" eyebrow="His story">A life rooted in family and home.</SectionHeading>
@@ -613,15 +613,15 @@ function MemorialHome() {
             <button
               type="button"
               className="group relative mx-auto w-full max-w-[560px] cursor-zoom-in overflow-hidden border-0 bg-white p-0 shadow-[0_18px_45px_rgba(3,38,63,.14)]"
-              onClick={() => setSelectedImage({ url: "/images/funeral/funeral-poster.jpg", altText: "Chief Charles Osumuo funeral arrangements poster" })}
-              aria-label="Enlarge Chief Charles Osumuo funeral arrangements poster"
+              onClick={() => setSelectedImage({ url: "/images/funeral/funeral-poster.jpg", altText: "Chief Charles Chidiebere Osumuo funeral arrangements poster" })}
+              aria-label="Enlarge Chief Charles Chidiebere Osumuo funeral arrangements poster"
             >
               <picture className="block">
                 <source media="(max-width: 640px)" srcSet="/images/funeral/funeral-poster-mobile.jpg" />
                 <img
                   className="h-auto w-full transition-transform duration-500 group-hover:scale-[1.012]"
                   src="/images/funeral/funeral-poster.jpg"
-                  alt="Chief Charles Osumuo funeral arrangements poster"
+                  alt="Chief Charles Chidiebere Osumuo funeral arrangements poster"
                   loading="lazy"
                   decoding="async"
                 />
@@ -645,7 +645,7 @@ function MemorialHome() {
           </div>
           <div className="mt-8 flex justify-end max-sm:justify-stretch">
             <a className={`${buttonClass} border-navy bg-transparent text-navy hover:bg-navy hover:text-white max-sm:w-full`} href="/gallery">
-              View all 40 photographs <span className="ml-2 text-[1.15em]" aria-hidden="true">→</span>
+              View all 35 photographs <span className="ml-2 text-[1.15em]" aria-hidden="true">→</span>
             </a>
           </div>
 
@@ -700,7 +700,7 @@ function MemorialHome() {
       </main>
 
       <footer className="grid min-h-[130px] place-content-center gap-[.4rem] bg-navy-deep text-center text-white">
-        <strong className="font-display text-[1.35rem]">Chief Osumuo Chidiebere Charles</strong>
+        <strong className="font-display text-[1.35rem]">Chief Charles Chidiebere Osumuo</strong>
         <span className="text-[.62rem] tracking-[.14em] text-[#849aab] uppercase">2026 · Forever remembered</span>
       </footer>
 
