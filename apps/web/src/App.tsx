@@ -43,7 +43,7 @@ const navItems = [
   ["#milestones", "Milestones"],
   ["#favourites", "Favourites"],
   ["#memories", "Memory Wall"],
-  ["#testimonials", "Testimonials"],
+  ["#tributes", "Tributes"],
   ["#funeral", "Funeral"],
 ] as const;
 const galleryTileLayouts = [
@@ -152,7 +152,7 @@ function SectionHeading({
   );
 }
 
-function TestimonialCarousel({ tributes }: { tributes: Tribute[] }) {
+function TributeCarousel({ tributes }: { tributes: Tribute[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
@@ -221,7 +221,7 @@ function TestimonialCarousel({ tributes }: { tributes: Tribute[] }) {
               type="button"
               className="h-11 w-11 shrink-0 cursor-pointer border border-[#ccd7df] bg-transparent p-0 text-[1.1rem] text-navy transition-colors hover:border-navy hover:bg-navy hover:text-white focus-visible:border-navy focus-visible:bg-navy focus-visible:text-white max-sm:h-10 max-sm:w-10"
               onClick={showPrevious}
-              aria-label="Show previous testimonial"
+              aria-label="Show previous tribute"
             >
               <span aria-hidden="true">←</span>
             </button>
@@ -240,14 +240,14 @@ function TestimonialCarousel({ tributes }: { tributes: Tribute[] }) {
               type="button"
               className="h-11 w-11 shrink-0 cursor-pointer border border-[#ccd7df] bg-transparent p-0 text-[1.1rem] text-navy transition-colors hover:border-navy hover:bg-navy hover:text-white focus-visible:border-navy focus-visible:bg-navy focus-visible:text-white max-sm:h-10 max-sm:w-10"
               onClick={showNext}
-              aria-label="Show next testimonial"
+              aria-label="Show next tribute"
             >
               <span aria-hidden="true">→</span>
             </button>
           </div>
           <div
             className="flex items-center gap-[.45rem] max-sm:hidden"
-            aria-label="Choose a testimonial"
+            aria-label="Choose a tribute"
           >
             {tributes.map((tribute, index) => (
               <button
@@ -259,7 +259,7 @@ function TestimonialCarousel({ tributes }: { tributes: Tribute[] }) {
                     : "w-6 max-sm:w-4"
                 }`}
                 onClick={() => setActiveIndex(index)}
-                aria-label={`Show testimonial ${index + 1}`}
+                aria-label={`Show tribute ${index + 1}`}
                 aria-current={index === activeIndex ? "true" : undefined}
               />
             ))}
@@ -470,10 +470,10 @@ function MemorialHome() {
       const approvedTributes = await getTributes();
       setTributes(approvedTributes);
       window.setTimeout(() => {
-        document.getElementById("testimonials")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.getElementById("tributes")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 50);
     } catch {
-      // The testimonial is already stored; a normal refresh will retrieve it.
+      // The tribute is already stored; a normal refresh will retrieve it.
     }
   }
 
@@ -561,8 +561,9 @@ function MemorialHome() {
             <h1 className="mb-[1.1rem] max-w-[700px] font-display text-[clamp(3.5rem,7vw,7rem)] leading-[1.05] font-semibold tracking-[-.045em] max-sm:text-[clamp(2.85rem,13vw,4.2rem)] max-sm:leading-[1.05]">{name}</h1>
             <p className="text-[.85rem] font-medium tracking-[.14em] text-[#d9e1e8] uppercase max-sm:text-[.65rem]">Born 1962 · Forever in our hearts</p>
             <p className="my-10 max-w-[540px] font-display text-[1.2rem] leading-[1.5] text-[#bdcbd5] max-sm:mx-auto max-sm:my-[1.7rem] max-sm:text-[1.05rem] max-sm:leading-[1.5]">A life remembered through the people, places and moments he held dear.</p>
-            <div className="flex flex-wrap items-center gap-[1.7rem] max-sm:justify-center">
-              <a className={`${buttonClass} bg-gold text-[#09243a]`} href="#share-testimonial">Share a testimonial</a>
+            <div className="flex flex-wrap items-center gap-x-[1.7rem] gap-y-4 max-sm:justify-center">
+              <a className={`${buttonClass} bg-gold text-[#09243a]`} href="#share-tribute">Share a tribute</a>
+              <a className={`${textLinkClass} text-[#dce5eb] transition-colors hover:text-gold`} href="#tributes">View other tributes <span className="text-[1.2em] text-gold" aria-hidden="true">↓</span></a>
               <a className={`${textLinkClass} text-white`} href="#story">Read his story <span className="text-[1.2em] text-gold" aria-hidden="true">↓</span></a>
             </div>
           </div>
@@ -713,30 +714,30 @@ function MemorialHome() {
           </div>
         </section>
 
-        <section id="testimonials" className={`${pageSectionClass} bg-[#f8fafc]`}>
+        <section id="tributes" className={`${pageSectionClass} bg-[#f8fafc]`}>
           <div className="border-t border-[#dfe6eb] pt-12 max-sm:pt-10">
             <div className="mb-8 flex items-end justify-between gap-8 max-sm:flex-col max-sm:items-start">
               <div>
-                <p className={`${eyebrowClass} mb-[.55rem]`}>Testimonials</p>
+                <p className={`${eyebrowClass} mb-[.55rem]`}>Tributes</p>
                 <h3 className="max-w-[600px] font-display text-[clamp(2rem,4vw,3.4rem)] leading-[1.12] text-navy max-sm:text-[1.9rem] max-sm:leading-[1.1]">Stories and words shared by family and friends.</h3>
               </div>
-              {tributes.length > 1 ? <p className="mb-[.35rem] max-w-[230px] text-[.72rem] leading-[1.65] text-muted max-sm:max-w-none">Use the arrows to read each testimonial.</p> : null}
+              {tributes.length > 1 ? <p className="mb-[.35rem] max-w-[230px] text-[.72rem] leading-[1.65] text-muted max-sm:max-w-none">Use the arrows to read each tribute.</p> : null}
             </div>
             {tributes.length ? (
-              <TestimonialCarousel tributes={tributes} />
+              <TributeCarousel tributes={tributes} />
             ) : (
               <div className="flex items-center justify-between gap-8 bg-mist p-8 text-muted max-sm:flex-col max-sm:items-start">
-                <p>The first testimonial will appear here.</p>
-                <a className={`${textLinkClass} text-navy`} href="#share-testimonial">Share yours <span className="text-[1.2em] text-gold" aria-hidden="true">→</span></a>
+                <p>The first tribute will appear here.</p>
+                <a className={`${textLinkClass} text-navy`} href="#share-tribute">Share yours <span className="text-[1.2em] text-gold" aria-hidden="true">→</span></a>
               </div>
             )}
           </div>
         </section>
 
-        <section id="share-testimonial" className={`${pageSectionClass} grid grid-cols-[.8fr_1.2fr] gap-[clamp(3rem,8vw,8rem)] bg-navy text-white max-[980px]:grid-cols-1 max-sm:gap-10`}>
+        <section id="share-tribute" className={`${pageSectionClass} grid grid-cols-[.8fr_1.2fr] gap-[clamp(3rem,8vw,8rem)] bg-navy text-white max-[980px]:grid-cols-1 max-sm:gap-10`}>
           <div>
             <p className={`${eyebrowClass} text-[#d3aa64]`}>In your own words</p>
-            <h2 className="mb-[1.4rem] font-display text-[clamp(2.6rem,6vw,5.3rem)] leading-[1.08] max-sm:text-[2.3rem] max-sm:leading-[1.08]">Share a testimonial for Chief Charles.</h2>
+            <h2 className="mb-[1.4rem] font-display text-[clamp(2.6rem,6vw,5.3rem)] leading-[1.08] max-sm:text-[2.3rem] max-sm:leading-[1.08]">Share a tribute for Chief Charles.</h2>
             <p className="max-w-[470px] leading-[1.7] text-[#b8c8d3] max-sm:text-[.95rem] max-sm:leading-[1.6]">Tell a story or leave a written tribute for others to read. Photographs are added separately in the Memory Wall above.</p>
           </div>
           <MemoryForm onSubmitted={handleTributeSubmitted} />

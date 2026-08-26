@@ -37,17 +37,17 @@ export function MemoryForm({ onSubmitted }: MemoryFormProps) {
       setState("success");
       setMessage(
         receipt.status === "approved"
-          ? "Your testimonial is now live in the Testimonials section."
-          : "Thank you. Your testimonial has been sent to the family for review.",
+          ? "Your tribute is now live in the Tributes section."
+          : "Thank you. Your tribute has been sent to the family for review.",
       );
       try {
         await onSubmitted?.(receipt);
       } catch {
-        // The testimonial was stored successfully even if refreshing the wall fails.
+        // The tribute was stored successfully even if refreshing the wall fails.
       }
     } catch (error) {
       setState("error");
-      setMessage(error instanceof Error ? error.message : "Your testimonial could not be sent.");
+      setMessage(error instanceof Error ? error.message : "Your tribute could not be sent.");
     }
   }
 
@@ -76,14 +76,14 @@ export function MemoryForm({ onSubmitted }: MemoryFormProps) {
       </label>
 
       <label className={labelClass}>
-        <span className={labelTextClass}>Your testimonial</span>
+        <span className={labelTextClass}>Your tribute</span>
         <textarea className={`${inputClass} resize-y`} name="message" required minLength={10} maxLength={3000} rows={5} />
       </label>
 
       <input className="absolute -left-[10000px]" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" />
 
       <button type="submit" className={submitButtonClass} disabled={state === "submitting"}>
-        {state === "submitting" ? "Publishing testimonial…" : "Publish testimonial"}
+        {state === "submitting" ? "Publishing tribute…" : "Publish tribute"}
       </button>
 
       {message ? (
