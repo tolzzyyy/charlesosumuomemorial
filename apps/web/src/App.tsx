@@ -380,7 +380,7 @@ function MemorialHome() {
   const funeral = data?.funeral;
   const fullName = data?.memorial.fullName ?? "Chief Charles Chidiebere Osumuo";
   const name = fullName.startsWith("Chief ") ? fullName : `Chief ${fullName}`;
-  const heroImage = data?.memorial.heroMediaUrl ?? "/images/memories/charles-11.jpg";
+  const heroImage = data?.memorial.heroMediaUrl ?? "/images/hero/chief-charles-hero.jpg";
 
   const milestones = [
     ...timeline.map((event) => ({

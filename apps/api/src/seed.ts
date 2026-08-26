@@ -73,7 +73,7 @@ export async function seedDatabase(database: TributeDatabase): Promise<void> {
       null,
       null,
       null,
-      "/images/memories/charles-11.jpg",
+      "/images/hero/chief-charles-hero.jpg",
       "draft",
       now,
       now,
