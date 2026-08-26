@@ -609,7 +609,7 @@ function MemorialHome() {
               <h3 className="mb-4 font-display text-[clamp(2rem,4vw,3.3rem)] leading-[1.12] text-navy max-sm:text-[1.9rem] max-sm:leading-[1.1]">Funeral arrangements poster.</h3>
               <p className="mb-5 text-[.9rem] leading-[1.7] text-muted max-sm:text-[.85rem] max-sm:leading-[1.6]">Select the poster to view the full announcement and programme clearly.</p>
               <a className={`${textLinkClass} text-navy`} href="/images/funeral/funeral-poster.jpg" target="_blank" rel="noreferrer">
-                Open full poster <span className="text-[1.15em] text-gold" aria-hidden="true">↗</span>
+                Open full poster
               </a>
             </div>
             <button
