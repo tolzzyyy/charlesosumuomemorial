@@ -701,7 +701,7 @@ function MemorialHome() {
 
       <footer className="grid min-h-[130px] place-content-center gap-[.4rem] bg-navy-deep text-center text-white">
         <strong className="font-display text-[1.35rem]">Chief Osumuo Chidiebere Charles</strong>
-        <span className="text-[.62rem] tracking-[.14em] text-[#849aab] uppercase">1962 · Forever remembered</span>
+        <span className="text-[.62rem] tracking-[.14em] text-[#849aab] uppercase">2026 · Forever remembered</span>
       </footer>
 
       {selectedImage ? (

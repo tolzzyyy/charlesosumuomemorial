@@ -31,11 +31,11 @@ const timeline: TimelineSeed[] = [
 
 const favourites = [
   ["Favourite drink", "Green tea"],
-  ["Favourite colour", "Blue"],
+  ["Favourite colour", "Blue and grey"],
   ["Favourite football team", "Chelsea"],
   ["Favourite books", "Life-help books"],
   ["Favourite place", "His home"],
-  ["Favourite hobby", "Working out"],
+  ["Favourite hobby", "Trying out new recipes"],
 ] as const;
 
 const memorialImages = Array.from({ length: 17 }, (_, index) => ({
