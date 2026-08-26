@@ -561,11 +561,13 @@ function MemorialHome() {
             <h1 className="mb-[1.1rem] max-w-[700px] font-display text-[clamp(3.5rem,7vw,7rem)] leading-[1.05] font-semibold tracking-[-.045em] max-sm:text-[clamp(2.85rem,13vw,4.2rem)] max-sm:leading-[1.05]">{name}</h1>
             <p className="text-[.85rem] font-medium tracking-[.14em] text-[#d9e1e8] uppercase max-sm:text-[.65rem]">Born 1962 · Forever in our hearts</p>
             <p className="my-10 max-w-[540px] font-display text-[1.2rem] leading-[1.5] text-[#bdcbd5] max-sm:mx-auto max-sm:my-[1.7rem] max-sm:text-[1.05rem] max-sm:leading-[1.5]">A life remembered through the people, places and moments he held dear.</p>
-            <div className="flex flex-wrap items-center gap-x-[1.7rem] gap-y-4 max-sm:justify-center">
-              <a className={`${buttonClass} bg-gold text-[#09243a]`} href="#share-tribute">Share a tribute</a>
-              <a className={`${textLinkClass} text-[#dce5eb] transition-colors hover:text-gold`} href="#tributes">View other tributes <span className="text-[1.2em] text-gold" aria-hidden="true">↓</span></a>
-              <a className={`${textLinkClass} text-white`} href="#story">Read his story <span className="text-[1.2em] text-gold" aria-hidden="true">↓</span></a>
+            <div className="flex flex-wrap items-center gap-3 max-sm:flex-col">
+              <a className={`${buttonClass} bg-gold text-[#09243a] max-sm:w-full`} href="#share-tribute">Share a tribute</a>
+              <a className={`${buttonClass} border-white/35 bg-white/[.04] text-white hover:border-gold hover:bg-white/[.08] max-sm:w-full`} href="#tributes">
+                View other tributes <span className="ml-2 text-[1.15em] text-gold" aria-hidden="true">↓</span>
+              </a>
             </div>
+            <a className={`${textLinkClass} mt-5 text-[#bdcbd5] transition-colors hover:text-white max-sm:justify-center`} href="#story">Read his story <span className="text-[1.2em] text-gold" aria-hidden="true">↓</span></a>
           </div>
           <figure className="relative mx-auto w-full max-w-[430px] pt-[1.1rem] pl-[1.1rem] max-[980px]:w-[min(78vw,430px)] max-sm:w-full max-sm:max-w-[390px] max-sm:pt-[.65rem] max-sm:pl-[.65rem]">
             <span className="absolute inset-[0_1.1rem_1.1rem_0] border border-gold/70 max-sm:inset-[0_.65rem_.65rem_0]" aria-hidden="true" />
