@@ -645,7 +645,7 @@ function MemorialHome() {
           </div>
           <div className="mt-8 flex justify-end max-sm:justify-stretch">
             <a className={`${buttonClass} border-navy bg-transparent text-navy hover:bg-navy hover:text-white max-sm:w-full`} href="/gallery">
-              View all 35 photographs <span className="ml-2 text-[1.15em]" aria-hidden="true">→</span>
+              View all 34 photographs <span className="ml-2 text-[1.15em]" aria-hidden="true">→</span>
             </a>
           </div>
 
