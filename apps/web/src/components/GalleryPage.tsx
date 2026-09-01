@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 const excludedPhotoNumbers = new Set([1, 2, 4, 11, 12, 13, 20, 21, 23, 24, 25, 27]);
-const galleryPhotoNumbers = Array.from({ length: 50 }, (_, index) => index + 1).filter(
+const galleryPhotoNumbers = Array.from({ length: 53 }, (_, index) => index + 1).filter(
   (number) => !excludedPhotoNumbers.has(number),
 );
 const memorialPhotos = galleryPhotoNumbers.map((number, index) => ({
@@ -71,7 +71,7 @@ export function GalleryPage() {
             A lifetime in photographs.
           </h1>
           <p className="mt-7 max-w-[580px] text-[.95rem] leading-[1.7] text-[#bdcbd5] max-sm:text-[.9rem] max-sm:leading-[1.6]">
-            Thirty-eight photographs shared by family and friends, gathered together in memory of Chief Charles.
+            Forty-one photographs shared by family and friends, gathered together in memory of Chief Charles.
           </p>
         </section>
 

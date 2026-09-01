@@ -10,7 +10,6 @@ import {
   type MemoryPhoto,
   type MemoryPhotoReceipt,
   type MemorialData,
-  type MemorialMedia,
   type Tribute,
   type TributeReceipt,
 } from "./lib/api";
@@ -54,7 +53,7 @@ const galleryTileLayouts = [
   "col-start-3 row-start-2 max-sm:col-start-2 max-sm:row-start-3",
 ];
 
-const featuredGalleryPhotoNumbers = [3, 10, 8, 14, 17];
+const featuredGalleryPhotoNumbers = [51, 52, 53, 10, 17];
 
 const fallbackGallery = featuredGalleryPhotoNumbers.map((number, index) => ({
   id: `fallback-${number}`,
@@ -430,10 +429,10 @@ function MemorialHome() {
   const gallery = useMemo(() => {
     if (!data?.media.length) return fallbackGallery;
     return featuredGalleryPhotoNumbers
-      .map((number) =>
-        data.media.find((item) => item.url.endsWith(`charles-${String(number).padStart(2, "0")}.jpg`)),
-      )
-      .filter((item): item is MemorialMedia => Boolean(item));
+      .map((number, index) =>
+        data.media.find((item) => item.url.endsWith(`charles-${String(number).padStart(2, "0")}.jpg`))
+          ?? fallbackGallery[index],
+      );
   }, [data]);
 
   const timeline = data?.timeline ?? [];
@@ -700,7 +699,7 @@ function MemorialHome() {
           </div>
           <div className="mt-8 flex justify-end max-sm:justify-stretch">
             <a className={`${buttonClass} border-navy bg-transparent text-navy hover:bg-navy hover:text-white max-sm:w-full`} href="/gallery">
-              View all 38 photographs <span className="ml-2 text-[1.15em]" aria-hidden="true">→</span>
+              View all 41 photographs <span className="ml-2 text-[1.15em]" aria-hidden="true">→</span>
             </a>
           </div>
 
