@@ -23,9 +23,9 @@ const timeline: TimelineSeed[] = [
   },
   {
     year: 1998,
-    title: "Birth of First Child",
+    title: "Blessed with 4 Children",
     location: "",
-    description: "Welcomed first daughter, Osumuo Amanda Adaeze.",
+    description: "They are blessed with 4 children.",
   },
 ];
 

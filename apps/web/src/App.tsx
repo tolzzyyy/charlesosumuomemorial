@@ -54,7 +54,9 @@ const galleryTileLayouts = [
   "col-start-3 row-start-2 max-sm:col-start-2 max-sm:row-start-3",
 ];
 
-const fallbackGallery = [3, 10, 8, 13, 17].map((number, index) => ({
+const featuredGalleryPhotoNumbers = [3, 10, 8, 14, 17];
+
+const fallbackGallery = featuredGalleryPhotoNumbers.map((number, index) => ({
   id: `fallback-${number}`,
   mediaType: "image" as const,
   url: `/images/memories/charles-${String(number).padStart(2, "0")}.jpg`,
@@ -427,8 +429,7 @@ function MemorialHome() {
 
   const gallery = useMemo(() => {
     if (!data?.media.length) return fallbackGallery;
-    const preferred = [3, 10, 8, 13, 17];
-    return preferred
+    return featuredGalleryPhotoNumbers
       .map((number) =>
         data.media.find((item) => item.url.endsWith(`charles-${String(number).padStart(2, "0")}.jpg`)),
       )
@@ -442,12 +443,19 @@ function MemorialHome() {
   const heroImage = data?.memorial.heroMediaUrl ?? "/images/hero/chief-charles-hero.jpg";
 
   const milestones = [
-    ...timeline.map((event) => ({
-      key: event.id,
-      year: event.eventYear?.toString() ?? "—",
-      title: event.title,
-      detail: event.location ?? event.description,
-    })),
+    ...timeline.map((event) => {
+      const isChildrenMilestone = ["birth of first child", "blessed with 4 children"]
+        .includes(event.title.toLowerCase());
+
+      return {
+        key: event.id,
+        year: isChildrenMilestone ? "1998–2005" : event.eventYear?.toString() ?? "—",
+        title: isChildrenMilestone ? "Blessed with 4 Children" : event.title,
+        detail: isChildrenMilestone
+          ? "They are blessed with 4 children."
+          : event.location ?? event.description,
+      };
+    }),
     ...(funeral?.funeralDate
       ? [
           {
@@ -560,7 +568,7 @@ function MemorialHome() {
             <p className={`${eyebrowClass} text-[#d3aa64]`}>In loving memory of</p>
             <h1 className="mb-[1.1rem] max-w-[700px] font-display text-[clamp(3.5rem,7vw,7rem)] leading-[1.05] font-semibold tracking-[-.045em] max-sm:text-[clamp(2.85rem,13vw,4.2rem)] max-sm:leading-[1.05]">{name}</h1>
             <p className="text-[.85rem] font-medium tracking-[.14em] text-[#d9e1e8] uppercase max-sm:text-[.65rem]">Born 1962 · Forever in our hearts</p>
-            <p className="my-10 max-w-[540px] font-display text-[1.2rem] leading-[1.5] text-[#bdcbd5] max-sm:mx-auto max-sm:my-[1.7rem] max-sm:text-[1.05rem] max-sm:leading-[1.5]">A life remembered through the people, places and moments he held dear.</p>
+            <p className="my-10 max-w-[540px] font-display text-[1.2rem] leading-[1.5] text-[#bdcbd5] max-sm:mx-auto max-sm:my-[1.7rem] max-sm:text-[1.05rem] max-sm:leading-[1.5]">Let the memory of Charles be with us forever.</p>
             <div className="flex flex-wrap items-center gap-3 max-sm:flex-col">
               <a className={`${buttonClass} bg-gold text-[#09243a] max-sm:w-full`} href="#share-tribute">Share a tribute</a>
               <a className={`${buttonClass} border-white/35 bg-white/[.04] text-white hover:border-gold hover:bg-white/[.08] max-sm:w-full`} href="#tributes">
@@ -593,7 +601,7 @@ function MemorialHome() {
           </div>
           <div className="max-w-[680px]">
             <SectionHeading className="text-navy" eyebrow="His story">A life rooted in family and home.</SectionHeading>
-            <p className="mb-4 leading-[1.7] text-[#5f707c] max-sm:text-[.95rem] max-sm:leading-[1.6]">Chief Charles was born in Cross River, Nigeria, in 1962. In 1998, he married Mrs Clementina Osumuo in Lagos and they welcomed their first daughter, Osumuo Amanda Adaeze.</p>
+            <p className="mb-4 leading-[1.7] text-[#5f707c] max-sm:text-[.95rem] max-sm:leading-[1.6]">Chief Charles was born in Cross River, Nigeria, in 1962. In 1998, he married Mrs Clementina Osumuo in Lagos and he is blessed with four children: Adaeze, Chisom, Chidiebere and Ikechukwu.</p>
             <p className="mb-4 leading-[1.7] text-[#5f707c] max-sm:text-[.95rem] max-sm:leading-[1.6]">Home remained his favourite place. He enjoyed working out, drinking green tea, reading life-help books and following Chelsea football club.</p>
             <p className="mb-4 leading-[1.7] text-[#5f707c] max-sm:text-[.95rem] max-sm:leading-[1.6]">This page will continue to grow as family and friends add photographs, stories and the small moments that made him unforgettable.</p>
             <a className={`${textLinkClass} mt-4 text-navy`} href="#memories">Explore his memories <span className="text-[1.2em] text-gold" aria-hidden="true">→</span></a>
@@ -692,7 +700,7 @@ function MemorialHome() {
           </div>
           <div className="mt-8 flex justify-end max-sm:justify-stretch">
             <a className={`${buttonClass} border-navy bg-transparent text-navy hover:bg-navy hover:text-white max-sm:w-full`} href="/gallery">
-              View all 34 photographs <span className="ml-2 text-[1.15em]" aria-hidden="true">→</span>
+              View all 28 photographs <span className="ml-2 text-[1.15em]" aria-hidden="true">→</span>
             </a>
           </div>
 
