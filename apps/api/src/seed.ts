@@ -23,7 +23,7 @@ const timeline: TimelineSeed[] = [
   },
   {
     year: 1998,
-    title: "Blessed with 4 Children",
+    title: "Blessed with Children",
     location: "",
     description: "They are blessed with 4 children.",
   },

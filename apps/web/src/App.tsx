@@ -443,13 +443,13 @@ function MemorialHome() {
 
   const milestones = [
     ...timeline.map((event) => {
-      const isChildrenMilestone = ["birth of first child", "blessed with 4 children"]
+      const isChildrenMilestone = ["birth of first child", "blessed with 4 children", "blessed with children"]
         .includes(event.title.toLowerCase());
 
       return {
         key: event.id,
         year: isChildrenMilestone ? "1998–2005" : event.eventYear?.toString() ?? "—",
-        title: isChildrenMilestone ? "Blessed with 4 Children" : event.title,
+        title: isChildrenMilestone ? "Blessed with Children" : event.title,
         detail: isChildrenMilestone
           ? "They are blessed with 4 children."
           : event.location ?? event.description,
