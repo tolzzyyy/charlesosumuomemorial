@@ -192,18 +192,22 @@ function TributeCarousel({ tributes }: { tributes: Tribute[] }) {
         >
           {tributes.map((tribute, index) => (
             <article
-              className="grid min-h-[380px] w-full min-w-full items-stretch bg-mist max-sm:min-h-0"
+              className="grid h-[480px] w-full min-w-full items-stretch bg-mist max-sm:h-[400px]"
               key={tribute.id}
               role="group"
               aria-roledescription="slide"
               aria-label={`${index + 1} of ${tributes.length}`}
               aria-hidden={index !== activeIndex}
             >
-              <div className="relative flex flex-col justify-between p-[clamp(2rem,5vw,4.8rem)] before:absolute before:top-[.4rem] before:left-[clamp(1.25rem,3vw,3rem)] before:font-display before:text-[clamp(5rem,9vw,9rem)] before:leading-none before:text-gold/30 before:content-['“'] max-sm:min-h-0 max-sm:px-5 max-sm:py-6 max-sm:before:left-3">
-                <blockquote className="relative z-10 mb-10 max-w-[760px] pt-[clamp(2.5rem,4vw,3.75rem)] font-display text-[clamp(1.45rem,3vw,2.35rem)] leading-[1.5] text-navy max-sm:mb-6 max-sm:pt-7 max-sm:text-[1.3rem] max-sm:leading-[1.5]">
+              <div className="relative flex min-h-0 min-w-0 flex-col justify-between p-[clamp(2rem,5vw,4.8rem)] before:absolute before:top-[.4rem] before:left-[clamp(1.25rem,3vw,3rem)] before:font-display before:text-[clamp(5rem,9vw,9rem)] before:leading-none before:text-gold/30 before:content-['“'] max-sm:px-5 max-sm:py-6 max-sm:before:left-3">
+                <blockquote
+                  className="relative z-10 mb-10 min-h-0 max-w-[760px] flex-1 overflow-y-auto overscroll-y-contain break-words pt-[clamp(2.5rem,4vw,3.75rem)] font-display text-[clamp(1.45rem,3vw,2.35rem)] leading-[1.5] text-navy [scrollbar-gutter:stable] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold max-sm:mb-6 max-sm:pt-7 max-sm:text-[1.3rem] max-sm:leading-[1.5]"
+                  tabIndex={index === activeIndex ? 0 : -1}
+                  aria-label={`Tribute from ${tribute.name}`}
+                >
                   {tribute.message}
                 </blockquote>
-                <footer className="grid gap-[.2rem] border-l-2 border-gold pl-4">
+                <footer className="grid shrink-0 gap-[.2rem] border-l-2 border-gold pl-4">
                   <strong className="text-[.82rem] font-semibold uppercase tracking-[.06em] text-ink">
                     {tribute.name}
                   </strong>
